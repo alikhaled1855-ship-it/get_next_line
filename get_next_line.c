@@ -6,7 +6,7 @@
 /*   By: alikhaled1855gmail.com <alikhaled1855gm    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/22 11:43:49 by alikhaled18       #+#    #+#             */
-/*   Updated: 2026/01/20 19:22:40 by alikhaled18      ###   ########.fr       */
+/*   Updated: 2026/01/20 19:46:41 by alikhaled18      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,8 +63,11 @@ char *get_next_line(int fd)
         i++;
         c = malloc(i+2);
         if(!c)
-        return (NULL);
-        ft_strlcpy(c, buffer, i+2);
+        {
+            free(buffer);
+            return (NULL);
+        }
+        ft_strlcpy(c, buffer, i+1);
         c[i+1] = '\0';
         newline = ft_strchr(buffer, '\n');
         newline++;
@@ -72,6 +75,7 @@ char *get_next_line(int fd)
         if(!ramining)
         {
             free(c);
+            free(buffer);
             return (NULL);
         }
         ft_strlcpy(ramining, newline, ft_strlen(newline));
