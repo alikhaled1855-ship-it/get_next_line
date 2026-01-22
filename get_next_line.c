@@ -6,83 +6,117 @@
 /*   By: alikhaled1855gmail.com <alikhaled1855gm    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/22 11:43:49 by alikhaled18       #+#    #+#             */
-/*   Updated: 2026/01/20 19:46:41 by alikhaled18      ###   ########.fr       */
+/*   Updated: 2026/01/22 07:58:31 by alikhaled18      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-char *get_next_line(int fd)
+#include "get_next_line.h"
+
+static char	*ft_free_null(char *ptr)
 {
-    static char *buffer;
-    int bytes_read;
-    char temp[BUFFER_SIZE + 1];
-    char *line;
-    char *newline;
+	free(ptr);
+	return (NULL);
+}
 
-    if (fd < 0 || BUFFER_SIZE <= 0)
-        return (NULL);
+static char	*ft_read_loop(int fd, char *buffer)
+{
+	char	*temp;
+	int		bytes;
+	char	*old;
 
-    if (!buffer)
-    {
-        buffer = malloc(1);
-        if (!buffer)
-            return (NULL);
-        buffer[0] = '\0';
-    }
-    bytes_read = 1;
-    while (!ft_strchr(buffer, '\n'))
-    {
-        bytes_read = read(fd, temp, BUFFER_SIZE);
+	temp = malloc((size_t)BUFFER_SIZE + 1);
+	if (!temp)
+		return (ft_free_null(buffer));
+	bytes = 1;
+	while (!ft_strchr(buffer, '\n'))
+	{
+		bytes = read(fd, temp, BUFFER_SIZE);
+		if (bytes <= 0)
+			break ;
+		temp[bytes] = '\0';
+		old = buffer;
+		buffer = ft_strjoin(buffer, temp);
+		free(old);
+		if (!buffer)
+			return (ft_free_null(temp));
+	}
+	free(temp);
+	if (bytes == -1)
+		return (ft_free_null(buffer));
+	return (buffer);
+}
 
-        if (bytes_read <= 0)
-            break;
+static char	*ft_extract_line(char *buffer)
+{
+	char	*line;
+	size_t	i;
 
-        temp[bytes_read] = '\0';
-        char *old = buffer;
-        buffer = ft_strjoin(buffer, temp);
-        free(old);
-    }
-    if (bytes_read <= 0)
-    {
-        if (buffer && buffer[0] != '\0')
-        {
-            line = buffer;
-            buffer = NULL;
-            return (line);
-        }
-        free(buffer);
-        buffer = NULL;
-        return (NULL);
-    }
-    if(ft_strchr(buffer, '\n'))
-    {
-        size_t i;
-        char *c;
+	i = 0;
+	if (!buffer[i])
+		return (NULL);
+	while (buffer[i] && buffer[i] != '\n')
+		i++;
+	line = malloc(i + 2);
+	if (!line)
+		return (NULL);
+	ft_strlcpy(line, buffer, i + 1);
+	if (buffer[i] == '\n')
+		line[i + 1] = '\0';
+	else
+		line[i] = '\0';
+	return (line);
+}
 
-        i = 0;
-        while(buffer[i] != '\n')
-        i++;
-        c = malloc(i+2);
-        if(!c)
-        {
-            free(buffer);
-            return (NULL);
-        }
-        ft_strlcpy(c, buffer, i+1);
-        c[i+1] = '\0';
-        newline = ft_strchr(buffer, '\n');
-        newline++;
-        char *ramining = malloc(ft_strlen(newline)+1);
-        if(!ramining)
-        {
-            free(c);
-            free(buffer);
-            return (NULL);
-        }
-        ft_strlcpy(ramining, newline, ft_strlen(newline));
-        ramining[ft_strlen(newline)] = '\0';
-        free(buffer);
-        buffer = ramining;  // ✅ بس!
-        return (c);
-    }
-    return (NULL);
+static char	*ft_update_buffer(char *buffer)
+{
+	size_t	len;
+	char	*newline;
+	char	*new_buff;
+
+	newline = ft_strchr(buffer, '\n');
+	if (!newline)
+	{
+		free(buffer);
+		return (NULL);
+	}
+	newline++;
+	len = ft_strlen(newline);
+	new_buff = malloc(len + 1);
+	if (!new_buff)
+	{
+		free(buffer);
+		return (NULL);
+	}
+	ft_strlcpy(new_buff, newline, len);
+	new_buff[len] = '\0';
+	free(buffer);
+	return (new_buff);
+}
+
+char	*get_next_line(int fd)
+{
+	static char	*buffer;
+	char		*line;
+
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
+	if (!buffer)
+	{
+		buffer = malloc(1);
+		if (!buffer)
+			return (NULL);
+		buffer[0] = '\0';
+	}
+	buffer = ft_read_loop(fd, buffer);
+	if (!buffer)
+		return (NULL);
+	line = ft_extract_line(buffer);
+	if (!line)
+	{
+		free(buffer);
+		buffer = NULL;
+		return (NULL);
+	}
+	buffer = ft_update_buffer(buffer);
+	return (line);
 }
