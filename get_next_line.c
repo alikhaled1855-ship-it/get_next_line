@@ -6,7 +6,7 @@
 /*   By: alikhaled1855gmail.com <alikhaled1855gm    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/22 11:43:49 by alikhaled18       #+#    #+#             */
-/*   Updated: 2026/01/22 07:58:31 by alikhaled18      ###   ########.fr       */
+/*   Updated: 2026/02/09 08:52:12 by alikhaled18      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,14 +56,18 @@ static char	*ft_extract_line(char *buffer)
 		return (NULL);
 	while (buffer[i] && buffer[i] != '\n')
 		i++;
-	line = malloc(i + 2);
+	if (buffer[i] == '\n')
+		line = malloc(sizeof(char) * (i + 2));
+	else
+		line = malloc(sizeof(char) * (i + 1));
 	if (!line)
 		return (NULL);
 	ft_strlcpy(line, buffer, i + 1);
 	if (buffer[i] == '\n')
+	{
+		line[i] = '\n';
 		line[i + 1] = '\0';
-	else
-		line[i] = '\0';
+	}
 	return (line);
 }
 
@@ -87,8 +91,7 @@ static char	*ft_update_buffer(char *buffer)
 		free(buffer);
 		return (NULL);
 	}
-	ft_strlcpy(new_buff, newline, len);
-	new_buff[len] = '\0';
+	ft_strlcpy(new_buff, newline, len + 1);
 	free(buffer);
 	return (new_buff);
 }

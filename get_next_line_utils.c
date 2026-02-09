@@ -6,7 +6,7 @@
 /*   By: alikhaled1855gmail.com <alikhaled1855gm    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/22 11:30:53 by alikhaled18       #+#    #+#             */
-/*   Updated: 2026/01/22 08:03:18 by alikhaled18      ###   ########.fr       */
+/*   Updated: 2026/02/09 08:47:09 by alikhaled18      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,17 +42,22 @@ char	*ft_strchr(const char *s, int c)
 	return (NULL);
 }
 
-size_t	ft_strlcpy(char *dst, const char *src, size_t len)
+size_t	ft_strlcpy(char *dst, const char *src, size_t size)
 {
 	size_t	i;
+	size_t	src_len;
 
+	src_len = ft_strlen(src);
+	if (size == 0)
+		return (src_len);
 	i = 0;
-	while (src[i] && i < len)
+	while (src[i] && i < size - 1)
 	{
 		dst[i] = src[i];
 		i++;
 	}
-	return (i);
+	dst[i] = '\0';
+	return (src_len);
 }
 
 char	*ft_strjoin(char const *s1, char const *s2)
@@ -70,8 +75,7 @@ char	*ft_strjoin(char const *s1, char const *s2)
 	sp = malloc(len + 1);
 	if (!sp)
 		return (NULL);
-	ft_strlcpy(sp, s1, s1len);
-	ft_strlcpy(sp + s1len, s2, s2len);
-	sp[len] = '\0';
+	ft_strlcpy(sp, s1, s1len + 1);
+	ft_strlcpy(sp + s1len, s2, s2len + 1);
 	return (sp);
 }
